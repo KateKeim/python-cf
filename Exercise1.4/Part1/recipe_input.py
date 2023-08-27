@@ -7,7 +7,7 @@ def take_recipe():
     cooking_time = int(
         input('Enter the cooking time of the recipe in minutes: ')
     )
-    ingredients = input('Enter the ingredients of the recipe: ')
+    ingredients = input('Enter the ingredients of the recipe, separated by a space: ')
     ingredients = ingredients.split()
     ingredients = [ingredient.lower() for ingredient in ingredients]
     recipe = {'Name': name, 'Cooking_Time': cooking_time, 'Ingredients': ingredients}
