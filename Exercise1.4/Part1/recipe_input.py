@@ -10,23 +10,24 @@ def take_recipe():
     ingredients = input('Enter the ingredients of the recipe, separated by a space: ')
     ingredients = ingredients.split()
     ingredients = [ingredient.lower() for ingredient in ingredients]
-    recipe = {'Name': name, 'Cooking_Time': cooking_time, 'Ingredients': ingredients}
-    difficulty = calc_difficulty(recipe)
+    difficulty = calc_difficulty(cooking_time, ingredients)
+    recipe = {'name': name, 'cooking_Time': cooking_time, 'ingredients': ingredients, 'difficulty': difficulty}
     return recipe
 
 # Define the function calc_diffficulty(), where the difficulty is returned as Easy, Medium, Intermediate or Hard
-def calc_difficulty(recipe):
-    if recipe['Cooking_Time'] < 10 and len(recipe['Ingredients']) < 4:
-        recipe['Difficulty'] = 'Easy'
-
-    elif recipe['Cooking_Time'] < 10 and len(recipe['Ingredients']) >= 4:
-        recipe['Difficulty'] = 'Medium'
-
-    elif recipe['Cooking_Time'] >= 10 and len(recipe['Ingredients']) < 4:
-        recipe['Difficulty'] = 'Intermediate'
-
-    elif recipe['Cooking_Time'] >= 10 and len(recipe['Ingredients']) >= 4:
-        recipe['Difficulty'] = 'Hard'
+def calc_difficulty(cooking_time, ingredients): # takes params cooking_time and ingredients
+        if (cooking_time < 10) and (len(ingredients) < 4):
+            difficulty = 'Easy'
+        elif (cooking_time < 10) and (len(ingredients) >= 4):
+            difficulty = 'Medium'
+        elif (cooking_time >= 10) and (len(ingredients) < 4):
+            difficulty = 'Intermediate'
+        elif (cooking_time >= 10) and (len(ingredients) >= 4):
+            difficulty = 'Hard'
+        else:
+            print('Something bad happened, please try again')
+        
+        return difficulty
 
 # Have the user enter a filename, which would attempt to open a binary file in read mode.
 recipes_list = []
@@ -36,6 +37,7 @@ filename = str(input('Enter a filename with your recipes: '))
 try:
     recipes_file = open(filename, 'rb')
     data = pickle.load(recipes_file)
+    print('Loaded file successfully.')
 except FileNotFoundError:
     print('File not found. Creating a new file.')
     data = {'recipes_list': [], 'all_ingredients': []}
@@ -55,16 +57,14 @@ for i in range(num):
     recipe = take_recipe()
     print(recipe)
 
-    for ingredient in recipe['Ingredients']:
+    for ingredient in recipe['ingredients']:
         if ingredient not in all_ingredients:
             all_ingredients.append(ingredient)
 
     recipes_list.append(recipe)
 
-# Gather the updated recipes_list and all_ingredients into the dictionary called data.
-data = {'recipes_list': recipes_list, 'all_ingredients': all_ingredients}
-
 # Open a binary file with the user-defined filename and write data to it using the pickle module.
 new_file_name = str(input('Enter a name for the new file.'))
 new_file_name = open(new_file_name, 'wb')
+data = data + '.bin'
 pickle.dump(data, new_file_name)
