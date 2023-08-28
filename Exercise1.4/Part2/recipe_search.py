@@ -27,6 +27,8 @@ def search_ingredient(data):
         ingredient_searched = ingredient_searched.lower()
     except IndexError:
         print('The number you entered is not on the list.')
+    except ValueError:
+        print('Please enter only number.')    
     except:
         print('An error occurred while finding your ingredient.')
     else:
