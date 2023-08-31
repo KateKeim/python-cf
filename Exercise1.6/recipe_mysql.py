@@ -72,7 +72,7 @@ def create_recipe(conn, cursor):
 # A method calculates the difficulty of the recipe by taking in cooking_time and ingredients as its arguments
 def calc_difficulty(cooking_time, recipe_ingredients):
     print("Run the calc_difficulty with: ", cooking_time, recipe_ingredients)
-
+    difficalty = None
     if (cooking_time < 10) and (len(recipe_ingredients) < 4):
         difficulty = "Easy"
     elif (cooking_time < 10) and (len(recipe_ingredients) >= 4):
