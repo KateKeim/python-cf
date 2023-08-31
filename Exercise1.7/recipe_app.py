@@ -37,20 +37,20 @@ class Recipe(Base):
 # Define a method called calculate_difficulty() to calculate the difficulty of a recipe
 def calc_difficulty(cooking_time, recipe_ingredients):
     print("Run the calc_difficulty with: ", cooking_time, recipe_ingredients)
-
+    difficalty = None
     if (cooking_time < 10) and (len(recipe_ingredients) < 4):
-        difficulty_level = "Easy"
+        difficulty = "Easy"
     elif (cooking_time < 10) and (len(recipe_ingredients) >= 4):
-        difficulty_level = "Medium"
+        difficulty = "Medium"
     elif (cooking_time >= 10) and (len(recipe_ingredients) < 4):
-        difficulty_level = "Intermediate"
+        difficulty = "Intermediate"
     elif (cooking_time >= 10) and (len(recipe_ingredients) >= 4):
-        difficulty_level = "Hard"
+        difficulty = "Hard"
     else:
         print("Something bad happened, please try again")
 
-    print("Difficulty level: ", difficulty_level)
-    return difficulty_level
+    print("Difficulty level: ", difficulty)
+    return difficulty
 
 
 def return_ingredients_as_list():
