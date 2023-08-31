@@ -2,38 +2,48 @@
 import pickle
 
 # Define a function called take_recipe() to take recipes from the user
+
+
 def take_recipe():
     name = str(input('Enter the name of the recipe: '))
     cooking_time = int(
         input('Enter the cooking time of the recipe in minutes: ')
     )
-    ingredients = input('Enter the ingredients of the recipe, separated by a space: ')
+    ingredients = input(
+        'Enter the ingredients of the recipe, separated by a space: ')
     ingredients = ingredients.split()
     ingredients = [ingredient.lower() for ingredient in ingredients]
     difficulty = calc_difficulty(cooking_time, ingredients)
-    recipe = {'name': name, 'cooking_Time': cooking_time, 'ingredients': ingredients, 'difficulty': difficulty}
+    recipe = {'name': name, 'cooking_Time': cooking_time,
+              'ingredients': ingredients, 'difficulty': difficulty}
     return recipe
 
 # Define the function calc_diffficulty(), where the difficulty is returned as Easy, Medium, Intermediate or Hard
-def calc_difficulty(cooking_time, ingredients): # takes params cooking_time and ingredients
-        if (cooking_time < 10) and (len(ingredients) < 4):
-            difficulty = 'Easy'
-        elif (cooking_time < 10) and (len(ingredients) >= 4):
-            difficulty = 'Medium'
-        elif (cooking_time >= 10) and (len(ingredients) < 4):
-            difficulty = 'Intermediate'
-        elif (cooking_time >= 10) and (len(ingredients) >= 4):
-            difficulty = 'Hard'
-        else:
-            print('Something bad happened, please try again')
-        
-        return difficulty
+# takes params cooking_time and ingredients
+
+
+def calc_difficulty(cooking_time, ingredients):
+    difficalty = None
+    if (cooking_time < 10) and (len(ingredients) < 4):
+        difficulty = 'Easy'
+    elif (cooking_time < 10) and (len(ingredients) >= 4):
+        difficulty = 'Medium'
+    elif (cooking_time >= 10) and (len(ingredients) < 4):
+        difficulty = 'Intermediate'
+    elif (cooking_time >= 10) and (len(ingredients) >= 4):
+        difficulty = 'Hard'
+    else:
+        print('Something bad happened, please try again')
+
+    return difficulty
+
 
 # Have the user enter a filename, which would attempt to open a binary file in read mode.
 recipes_list = []
 all_ingredients = []
 
-filename = str(input('Enter a filename with your recipes: '))
+filename = str(input('Enter a filename with your recipes without extension: '))
+filename = filename + '.bin'
 try:
     recipes_file = open(filename, 'rb')
     data = pickle.load(recipes_file)
@@ -64,7 +74,5 @@ for i in range(num):
     recipes_list.append(recipe)
 
 # Open a binary file with the user-defined filename and write data to it using the pickle module.
-new_file_name = str(input('Enter a name for the new file.'))
-new_file_name = open(new_file_name, 'wb')
-data = data + '.bin'
-pickle.dump(data, new_file_name)
+filename = open(filename, 'wb')
+pickle.dump(data, filename)
