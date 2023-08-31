@@ -5,13 +5,12 @@ class Recipe(object):
     def __init__(self, name):
         self.name = name # the name of a recipe
         self.ingredients = [] # a list containing the ingredients for a recipe
-        self.cooking_time = int(0) # the time taken in minutes to carry out a recipe
+        self.cooking_time = 0 # the time taken in minutes to carry out a recipe
         self.difficulty = '' # an auto-generated attribute that says whether the recipe is Easy, Medium, Intermediate, or Hard
 
     #  method that takes in the name for the recipe
     def get_name(self): # Getter method for name
-        output = 'Recipe name: ' + str(self.name)
-        return output
+        return self.name
 
     def set_name(self, name): # Setter method for name
         self.name = str(name)
@@ -25,38 +24,34 @@ class Recipe(object):
 
     # A method called add_ingredients that takes in variable-length arguments for the recipe’s ingredients.
     def add_ingredients(self, *args):
-        self.ingredients = args
+        self.ingredients = list(args)
         self.update_all_ingredients()
+        
 
     # A getter method for ingredients that returns the list itself.
     def get_ingredients(self):
-        print('\nIngredients: ')
-        print('---------------------------')
-        for ingredient in self.ingredients:
-            print(' - ' + str(ingredient))
-        print('\n')
+        return self.ingredients
+            
 
     # Updated difficalty with this method
     def calc_difficulty(self, cooking_time, ingredients): # takes params cooking_time and ingredients
         if (cooking_time < 10) and (len(ingredients) < 4):
-            difficulty_level = 'Easy'
+            self.difficulty = 'Easy'
         elif (cooking_time < 10) and (len(ingredients) >= 4):
-            difficulty_level = 'Medium'
+            self.difficulty = 'Medium'
         elif (cooking_time >= 10) and (len(ingredients) < 4):
-            difficulty_level = 'Intermediate'
+            self.difficulty = 'Intermediate'
         elif (cooking_time >= 10) and (len(ingredients) >= 4):
-            difficulty_level = 'Hard'
+            self.difficulty = 'Hard'
         else:
             print('Something bad happened, please try again')
 
-        return difficulty_level
 
     # A getter method for difficulty which also calls calculate_difficulty() if difficulty hasn’t been calculated.
     def get_difficulty(self):
-        difficulty = self.calc_difficulty(self.cooking_time, self.ingredients)
-        output = 'Difficulty: ' + str(self.cooking_time)
-        self.difficulty = difficulty
-        return output
+        if (self.difficulty == ''):
+            self.calc_difficulty(self.cooking_time, self.ingredients)
+        return self.difficulty
 
     # A search method that takes an ingredient as an argument
     def search_ingredient(self, ingredient, ingredients):
