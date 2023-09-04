@@ -9,10 +9,10 @@ conn = mysql.connector.connect(
 cursor = conn.cursor()
 
 # Create a database called task_database.
-cursor.execute("CREATE DATABASE IF NOT EXISTS task_database")
+cursor.execute("CREATE DATABASE IF NOT EXISTS task_database;")
 
 # Access database with the USE statement.
-cursor.execute("USE task_database")
+cursor.execute("USE task_database;")
 
 # Create a table called Recipes
 cursor.execute('''CREATE TABLE IF NOT EXISTS Recipes(
@@ -24,12 +24,14 @@ difficulty VARCHAR(20)
 )''')
 
 # Create main_menu function
+
+
 def main_menu(conn, cursor):
     choice = ""
     while (choice != "quit"):
-        print("\n======================================================")
+        print("\n" + "="*50)
         print("\nMain Menu:")
-        print("-------------")
+        print("\n" + "-"*20)
         print("Pick a choice:")
         print("   1. Create a new recipe")
         print("   2. Search for a recipe by ingredient")
@@ -38,7 +40,7 @@ def main_menu(conn, cursor):
         print("   5. View all recipes")
         print("\n   Type 'quit' to exit the program.")
         choice = input("\nYour choice: ")
-        print("\n======================================================\n")
+        print("\n" + "="*50)
 
         if choice == "1":
             create_recipe(conn, cursor)
@@ -52,16 +54,18 @@ def main_menu(conn, cursor):
             view_all_recipes(conn, cursor)
 
 # Creating a Recipe with create_recipe()
+
+
 def create_recipe(conn, cursor):
     recipe_ingredients = []
     # Collect the following details for a recipe entry
     name = str(input("\nEnter the name of the recipe: "))
-    cooking_time = int(input("Enter the cooking time (minutes): "))
-    ingredient = input("Enter the ingredients: ")
+    cooking_time = int(input("Enter the cooking time (in minutes): "))
+    ingredient = input("Enter the ingredients seperated by a comma: ")
 
     recipe_ingredients.append(ingredient)
     difficulty = calc_difficulty(cooking_time, recipe_ingredients)
-    recipe_ingredients_str = ", ".join(recipe_ingredients)
+    recipe_ingredients_str = ", ".join(calc_difficulty)
     sql = 'INSERT INTO Recipes (name, ingredients, cooking_time, difficulty) VALUES (%s, %s, %s, %s)'
     val = (name, recipe_ingredients_str, cooking_time, difficulty)
 
@@ -70,8 +74,9 @@ def create_recipe(conn, cursor):
     print("Recipe saved into the database.")
 
 # A method calculates the difficulty of the recipe by taking in cooking_time and ingredients as its arguments
+
+
 def calc_difficulty(cooking_time, recipe_ingredients):
-    print("Run the calc_difficulty with: ", cooking_time, recipe_ingredients)
     difficalty = None
     if (cooking_time < 10) and (len(recipe_ingredients) < 4):
         difficulty = "Easy"
@@ -84,13 +89,14 @@ def calc_difficulty(cooking_time, recipe_ingredients):
     else:
         print("Something bad happened, please try again")
 
-    print("Difficulty level: ", difficulty)
     return difficulty
 
 # Searching for a Recipe with search_recipe()
+
+
 def search_recipe(conn, cursor):
     all_ingredients = []
-    cursor.execute("SELECT ingredients FROM Recipes")
+    cursor.execute("SELECT ingredients FROM Recipes;")
     results = cursor.fetchall()
     for recipe_ingredients_list in results:
         for recipe_ingredients in recipe_ingredients_list:
@@ -102,9 +108,9 @@ def search_recipe(conn, cursor):
     all_ingredients_list = list(enumerate(all_ingredients))
 
     print("\nAll ingredients list:")
-    print("------------------------")
+    print("\n" + "-"*25)
 
-    for index, tup in enumerate(all_ingredients_list):
+    for index, tup in all_ingredients_list:
         print(str(tup[0]+1) + ". " + tup[1])
 
     try:
@@ -122,7 +128,7 @@ def search_recipe(conn, cursor):
 
     else:
         print("\nThe recipe(s) below include(s) the selected ingredient: ")
-        print("-------------------------------------------------------")
+        print("\n" + "-"*30)
 
         cursor.execute("SELECT * FROM Recipes WHERE ingredients LIKE %s",
                        ('%' + ingredient_searched + '%', ))
@@ -136,6 +142,8 @@ def search_recipe(conn, cursor):
             print("Difficulty: ", row[4])
 
 # Updating a Recipe with update_recipe()
+
+
 def update_recipe(conn, cursor):
     view_all_recipes(conn, cursor)
     recipe_id_for_update = int(
@@ -190,6 +198,8 @@ def update_recipe(conn, cursor):
     conn.commit()
 
 # Deleting a Recipe with delete_recipe()
+
+
 def delete_recipe(conn, cursor):
     view_all_recipes(conn, cursor)
     recipe_id_for_deletion = (
@@ -203,7 +213,7 @@ def delete_recipe(conn, cursor):
 
 def view_all_recipes(conn, cursor):
     print("\nAll recipes can be found below: ")
-    print("-------------------------------------------")
+    print("\n" + "-"*30)
 
     cursor.execute("SELECT * FROM Recipes")
     results = cursor.fetchall()
