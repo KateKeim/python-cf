@@ -61,11 +61,15 @@ def create_recipe(conn, cursor):
     # Collect the following details for a recipe entry
     name = str(input("\nEnter the name of the recipe: "))
     cooking_time = int(input("Enter the cooking time (in minutes): "))
-    ingredient = input("Enter the ingredients seperated by a comma: ")
+    ingredients = input("Enter the ingredients seperated by a comma: ")
+    recipe_ingredients = ingredients.split(",")
 
-    recipe_ingredients.append(ingredient)
+    recipe_ingredients.append(ingredients)
     difficulty = calc_difficulty(cooking_time, recipe_ingredients)
-    recipe_ingredients_str = ", ".join(calc_difficulty)
+
+    # Remove the ingredients string from the recipe_ingredients_str variable
+    recipe_ingredients_str = ", ".join(recipe_ingredients[:-1])
+
     sql = 'INSERT INTO Recipes (name, ingredients, cooking_time, difficulty) VALUES (%s, %s, %s, %s)'
     val = (name, recipe_ingredients_str, cooking_time, difficulty)
 
@@ -74,8 +78,6 @@ def create_recipe(conn, cursor):
     print("Recipe saved into the database.")
 
 # A method calculates the difficulty of the recipe by taking in cooking_time and ingredients as its arguments
-
-
 def calc_difficulty(cooking_time, recipe_ingredients):
     difficalty = None
     if (cooking_time < 10) and (len(recipe_ingredients) < 4):
@@ -95,51 +97,49 @@ def calc_difficulty(cooking_time, recipe_ingredients):
 
 
 def search_recipe(conn, cursor):
-    all_ingredients = []
-    cursor.execute("SELECT ingredients FROM Recipes;")
-    results = cursor.fetchall()
-    for recipe_ingredients_list in results:
-        for recipe_ingredients in recipe_ingredients_list:
-            recipe_ingredient_split = recipe_ingredients.split(", ")
-            all_ingredients.extend(recipe_ingredient_split)
+  all_ingredients = []
+  cursor.execute("SELECT ingredients FROM Recipes")
+  results = cursor.fetchall()
+  for recipe_ingredients_list in results:
+    for recipe_ingredients in recipe_ingredients_list:
+      recipe_ingredient_split = recipe_ingredients.split(", ")
+      all_ingredients.extend(recipe_ingredient_split)
 
-    all_ingredients = list(dict.fromkeys(all_ingredients))
+  all_ingredients = list(dict.fromkeys(all_ingredients))
 
-    all_ingredients_list = list(enumerate(all_ingredients))
+  all_ingredients_list = list(enumerate(all_ingredients))
 
-    print("\nAll ingredients list:")
-    print("\n" + "-"*25)
+  print("\nAll ingredients list:")
+  print("-"*30)
 
-    for index, tup in all_ingredients_list:
-        print(str(tup[0]+1) + ". " + tup[1])
+  for index, tup in enumerate(all_ingredients_list):
+    print(str(tup[0]+1) + ". " + tup[1])
 
-    try:
-        ingredient_searched_nber = input(
-            "\nEnter the number corresponding to the ingredient you want to select from the above list: ")
+  try:
+    ingredient_searched_nber = input("\nEnter the number corresponding to the ingredient you want to select from the above list: ")
 
-        ingredient_searched_index = int(ingredient_searched_nber) - 1
+    ingredient_searched_index = int(ingredient_searched_nber) - 1
 
-        ingredient_searched = all_ingredients_list[ingredient_searched_index][1]
+    ingredient_searched = all_ingredients_list[ingredient_searched_index][1]
 
-        print("\nYou selected the ingredient: ", ingredient_searched)
+    print("\nYou selected the ingredient: ", ingredient_searched)
 
-    except:
-        print("An unexpected error occurred. Make sure to select a number from the list.")
+  except:
+    print("An unexpected error occurred. Make sure to select a number from the list.")
 
-    else:
-        print("\nThe recipe(s) below include(s) the selected ingredient: ")
-        print("\n" + "-"*30)
+  else:
+    print("\nThe recipe(s) below include(s) the selected ingredient: ")
+    print("-"*30)
 
-        cursor.execute("SELECT * FROM Recipes WHERE ingredients LIKE %s",
-                       ('%' + ingredient_searched + '%', ))
+    cursor.execute("SELECT * FROM Recipes WHERE ingredients LIKE %s", ('%' + ingredient_searched + '%', ))
 
-        results_recipes_with_ingredient = cursor.fetchall()
-        for row in results_recipes_with_ingredient:
-            print("\nID: ", row[0])
-            print("Name: ", row[1])
-            print("Ingredients: ", row[2])
-            print("Cooking Time: ", row[3])
-            print("Difficulty: ", row[4])
+    results_recipes_with_ingredient = cursor.fetchall()
+    for row in results_recipes_with_ingredient:
+      print("\nID: ", row[0])
+      print("name: ", row[1])
+      print("ingredients: ", row[2])
+      print("cooking_time: ", row[3])
+      print("difficulty: ", row[4])
 
 # Updating a Recipe with update_recipe()
 
