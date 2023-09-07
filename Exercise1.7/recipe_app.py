@@ -29,12 +29,12 @@ class Recipe(Base):
 
     # Define a __repr__ method that shows a quick representation of the recipe.
     def __repr__(self):
-        return "<Recipe ID: " + str(self.id) + "-" + self.name + " Level: " + difficulty + ">"
+        return "<Recipe ID: " + str(self.id) + "-" + self.name + " Level: " + self.difficulty + ">"
 
     # Define a __str__ method that prints a well-formatted version of the recipe.
     def __str__(self):
         output = "\nName: " + str(self.name) + \
-            "\nCooking time (in minutes): " + str(self.cooking_time) + \
+            "\nCooking time (minutes): " + str(self.cooking_time) + \
             "\nDifficulty: " + str(self.difficulty) + \
             "\nIngredients: " + str(self.ingredients)
         return output
@@ -42,24 +42,23 @@ class Recipe(Base):
 
 # Define a method called calculate_difficulty() to calculate the difficulty of a recipe
 
-    def calc_difficulty(self, cooking_time, ingredients):
-        difficulty = "Unknown"
-        ingredients = self.ingredients.split(',')
-        if self.cooking_time < 10 and len(ingredients) < 4:
-            difficulty = "Easy"
-        elif self.cooking_time < 10 and len(ingredients) >= 4:
-            difficulty = "Medium"
-        elif self.cooking_time >= 10 and len(ingredients) < 4:
-            difficulty = "Intermediate"
-        elif self.cooking_time >= 10 and len(ingredients) >= 4:
-            difficulty = "Hard"
-        self.difficulty = difficulty
+    def calc_difficulty(self):
+        print("Run the calc_difficulty with: ",
+              self.cooking_time, self.ingredients)
+        if (self.cooking_time < 10) and (len(self.ingredients) < 4):
+            self.difficulty = "Easy"
+        elif (self.cooking_time < 10) and (len(self.ingredients) >= 4):
+            self.difficulty = "Medium"
+        elif (self.cooking_time >= 10) and (len(self.ingredients) < 4):
+            self.difficulty = "Intermediate"
+        elif (self.cooking_time >= 10) and (len(self.ingredients) >= 4):
+            self.difficulty = "Hard"
+        else:
+            print("Something bad happened, please try again")
 
     def return_ingredients_as_list(self):
-        if len(self.ingredients) == 0:
-            return []
-
-        return [i.strip() for i in self.ingredients.split(',')]
+        recipe_ingredients_list = self.ingredients.split(", ")
+        return recipe_ingredients_list
 
 
 # Create the corresponding table on the database using the create_all() method
@@ -115,6 +114,7 @@ def create_recipe():
     )
 
     print(recipe_entry)
+    recipe_entry.calc_difficulty()
 
     session.add(recipe_entry)
     session.commit()
@@ -222,69 +222,92 @@ def search_by_ingredients():
 
 
 def edit_recipe():
-    if not session.query(Recipe).count():
-        print("No recipe entries")
+    if session.query(Recipe).count() == 0:
+        print("There is no recipe in the database")
         return None
 
-    # Retrieve the id and name for each recipe from the database, and store them into results.
-    results = session.query(Recipe.id, Recipe.name).all()
+    else:
+        # Retrieve the id and name for each recipe from the database, and store them into results.
+        results = session.query(Recipe).with_entities(
+            Recipe.id, Recipe.name).all()
+        # From each item in results, display the recipes available to the user.
+        print("results: ", results)
+        print("Lits of available recipes:")
+        for recipe in results:
+            print("\nId: ", recipe[0])
+            print("Name: ", recipe[1])
 
-    # From each item in results, display the recipes available to the user.
-    print("Recipes:")
-    for result in results:
-        print(f"{result[0]}: {result[1]}")
+        # The user gets to pick a recipe by its id. If the chosen id doesn’t exist, exit the function.
+        recipe_id_for_edit = int(
+            (input("\nEnter the ID of the recipe you want to delete: ")))
 
-    # The user gets to pick a recipe by its id. If the chosen id doesn’t exist, exit the function
-    num = input("Enter number corresponding to the recipe to update: ")
+        print(session.query(Recipe).with_entities(Recipe.id).all())
 
-    # Retrieve the entire recipe that corresponds to this id from the database into a variable called recipe_to_edit.
-    try:
-        num = int(num)
-        recipe_to_edit = session.get(Recipe, num)
-        if not recipe_to_edit:
-            raise
-    except:
-        print('Invalid entry. Exiting...')
-        return None
+        recipes_id_tup_list = session.query(
+            Recipe).with_entities(Recipe.id).all()
+        recipes_id_list = []
 
-    # Display the recipe, including only name, ingredients and cooking_time. difficulty isn’t editable since it is a calculated value.
-    # Display a number next to each attribute so that the user gets to pick one.
-    print("Item to edit")
-    print(f"1. Name: {recipe_to_edit.name}")
-    print(f"2. Cooking Time: {recipe_to_edit.cooking_time}")
-    print(f"3. Ingredients: {recipe_to_edit.ingredients}")
+        for recipe_tup in recipes_id_tup_list:
+            print(recipe_tup[0])
+            recipes_id_list.append(recipe_tup[0])
 
-    # Ask the user which attribute they’d like to edit by entering the corresponding number.
-    num = input("Enter number corresponding to the attribute you want to edit: ")
-    if num not in ['1', '2', '3']:
-        print('Invalid entry. Exiting...')
-        return None
+        print(recipes_id_list)
 
-    # Based on the input, use if-else statements to edit the respective attribute inside the recipe_to_edit object.
-    if num == '1':
-        name = input("Enter updated name: ")
-        recipe_to_edit.name = name
-    elif num == '2':
-        cooking_time = input("Enter updated cooking time: ")
-        if not cooking_time.isnumeric():
-            print('Invalid entry. Exiting...')
-            return None
-        recipe_to_edit.cooking_time = int(cooking_time)
-    elif num == '3':
-        ingredients = input(
-            "Enter updated list of comma separated ingredients: ")
-        if not ingredients:
-            print('Invalid entry. Exiting...')
-            return None
-        recipe_to_edit.ingredients = ingredients
+        if recipe_id_for_edit not in recipes_id_list:
+            print("Not in the ID list, please try again later.")
+        else:
+            print("Ok you can continue")
 
-    # Recalculate the difficulty using the object’s calculate_difficulty() method.
-    recipe_to_edit.calc_difficulty(
-        recipe_to_edit.cooking_time, recipe_to_edit.ingredients)
+            # Retrieve the entire recipe that corresponds to this id from the database into a variable called recipe_to_edit.
+            recipe_to_edit = session.query(Recipe).filter(
+                Recipe.id == recipe_id_for_edit).one()
 
-    # Commit these changes to the database.
-    session.commit()
-    print("Modification done.")
+            print("\nWARNING: You are about to edit the following recipe: ")
+            print(recipe_to_edit)
+            # Display a number next to each attribute so that the user gets to pick one.
+            column_for_update = int(input(
+                "\nEnter the data you want to update among 1. name, 2. cooking time and 3. ingredients: (select '1' or '2' or '3'): "))
+
+            # Based on the input, use if-else statements to edit the respective attribute inside the recipe_to_edit object.
+            if column_for_update == 1:
+                print("You want to update the name of the recipe")
+                # Ask the user which attribute they’d like to edit by entering the corresponding number.
+                updated_name = (
+                    input("\nEnter the new value for the recipe name: "))
+                print("Choice: ", updated_name)
+                session.query(Recipe).filter(Recipe.id == recipe_id_for_edit).update(
+                    {Recipe.name: updated_name})
+                session.commit()
+
+            elif column_for_update == 2:
+                print("You want to update the cooking time of the recipe")
+                # Ask the user which attribute they’d like to edit by entering the corresponding number.
+                updated_cooking_time = (
+                    input("\nEnter the new value for the recipe name: "))
+                print("Choice: ", updated_cooking_time)
+                session.query(Recipe).filter(Recipe.id == recipe_id_for_edit).update(
+                    {Recipe.cooking_time: updated_cooking_time})
+                session.commit()
+
+            elif column_for_update == 3:
+                print("You want to update the ingredients of the recipe")
+                updated_ingredients = (
+                    input("\nEnter the new value for the recipe name: "))
+                print("Choice: ", updated_ingredients)
+                session.query(Recipe).filter(Recipe.id == recipe_id_for_edit).update(
+                    {Recipe.ingredients: updated_ingredients})
+                session.commit()
+
+            else:
+                print("Wrong input, please try again.")
+
+            # Update the difficulty.
+            updated_difficulty = self.calc_difficulty()
+            print("updated_difficulty: ", updated_difficulty)
+            recipe_to_edit.difficulty = updated_difficulty
+            # Commit the changes.
+            session.commit()
+            print("Modification done.")
 
 # Function 5:
 
@@ -358,7 +381,7 @@ def main_menu():
         else:
             if choice == "quit":
                 session.close()
-                print("Bye~ Have a good day.\n")
+                print("Bye!\n")
             else:
                 print("WARNING... Wrong entry, please try again.")
 
